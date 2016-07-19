@@ -181,10 +181,12 @@ connecting(connect, State) ->
             gen_fsm:send_event_after(3000, connect),
             wrap_res(connecting, on_connect_error, [server_not_found], State)
     end;
-connecting(_Event, State) ->
+connecting(Event, State) ->
+    gen_fsm:send_event_after(500, Event),
     {next_state, connecting, State}.
 
-waiting_for_connack(_Event, State) ->
+waiting_for_connack(Event, State) ->
+    gen_fsm:send_event_after(500, Event),
     {next_state, waiting_for_connack, State}.
 
 disconnecting({error, ConnectError}, #state{sock=Sock, transport={Transport,_}} = State) ->
