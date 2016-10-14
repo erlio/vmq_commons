@@ -48,6 +48,8 @@
 -spec parse(binary()) -> {mqtt_frame(), binary()} | {error, atom()} | more.
 parse(Data) ->
     parse(Data, ?MAX_PACKET_SIZE).
+
+-spec parse(binary(), non_neg_integer()) ->  {mqtt_frame(), binary()} | {error, atom()} | more.
 parse(<<Fixed:1/binary, 0:1, DataSize:7, Data/binary>>, MaxSize)->
     parse(DataSize, MaxSize, Fixed, Data);
 parse(<<Fixed:1/binary, 1:1, L1:7, 0:1, L2:7, Data/binary>>, MaxSize) ->
@@ -61,6 +63,10 @@ parse(<<_:8/binary, _/binary>>, _) ->
 parse(_, _) ->
     more.
 
+parse(DataSize, 0, Fixed, Data) ->
+    %% no max size limit
+    <<Var:DataSize/binary, Rest/binary>> = Data,
+    {variable(Fixed, Var), Rest};
 parse(DataSize, MaxSize, Fixed, Data) when byte_size(Data) =< MaxSize ->
     <<Var:DataSize/binary, Rest/binary>> = Data,
     {variable(Fixed, Var), Rest};
