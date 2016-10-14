@@ -464,8 +464,11 @@ parser_test() ->
     compare_frame("disconnect", gen_disconnect()),
 
 
-    P = gen_publish("test-topic", 2, crypto:rand_bytes(1000), []),
-    {error, packet_exceeds_max_size} = parse(P, byte_size(P) - 2).
+    P = gen_publish("test-topic", 2, crypto:rand_bytes(100), []),
+    {error, packet_exceeds_max_size} = parse(P, byte_size(P) - 3),
+
+    <<Part:128, _/binary>> = P,
+    more = parse(Part).
 
 compare_frame(Test, Frame) ->
     io:format(user, "---- compare test: ~p~n", [Test]),
